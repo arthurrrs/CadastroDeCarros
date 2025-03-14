@@ -1,28 +1,22 @@
-document.getElementById('show-cars').addEventListener('click', function() {
-    const carList = document.getElementById('car-list');
 
-    const cars = [
-        { name: 'Fusca', image: 'https://www.carrosnaweb.com.br/fotos/fusca.jpg' },
-        { name: 'Civic', image: 'https://www.carrosnaweb.com.br/fotos/civic.jpg' },
-        { name: 'Chevrolet Camaro', image: 'https://www.carrosnaweb.com.br/fotos/camaro.jpg' },
-        { name: 'Ferrari', image: 'https://www.carrosnaweb.com.br/fotos/ferrari.jpg' },
-    ];
+document.getElementById('carForm').addEventListener('submit', function(event) {
+    event.preventDefault(); 
 
-    carList.innerHTML = ''; // Limpa a lista antes de adicionar novos carros
+   
+    const brand = document.getElementById('carBrand').value;
+    const name = document.getElementById('carName').value;
+    const price = document.getElementById('Price').value;
+    const fuelType = document.getElementById('FuelType').value;
 
-    cars.forEach(car => {
-        const carItem = document.createElement('div');
-        carItem.classList.add('car-item');
+   
+    if (brand && name && price && fuelType) {
+        document.getElementById('message').textContent = `Carro ${name} (${brand}) cadastrado com sucesso!`;
+        document.getElementById('message').style.color = 'green';
 
-        const carImage = document.createElement('img');
-        carImage.src = car.image;
-        carImage.alt = car.name;
 
-        const carName = document.createElement('h3');
-        carName.textContent = car.name;
-
-        carItem.appendChild(carImage);
-        carItem.appendChild(carName);
-        carList.appendChild(carItem);
-    });
+        document.getElementById('carForm').reset();
+    } else {
+        document.getElementById('message').textContent = 'Preencha todos os campos corretamente.';
+        document.getElementById('message').style.color = 'red';
+    }
 });
