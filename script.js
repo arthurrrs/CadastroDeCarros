@@ -1,22 +1,32 @@
+async function fetchData() {
+    const tableBody = document.getElementById('car-table');
+    tableBody.innerHTML = '<tr><td colspan="5" class="text-center">Carregando carros...</td></tr>'
 
-document.getElementById('carForm').addEventListener('submit', function(event) {
-    event.preventDefault(); 
+    try {
+        const response = await fetch('https://carangas.herokuapp.com/cars')
 
-   
-    const brand = document.getElementById('carBrand').value;
-    const name = document.getElementById('carName').value;
-    const price = document.getElementById('Price').value;
-    const fuelType = document.getElementById('FuelType').value;
+        const data = await response.json();
+        const cars = data;
+        console.log(cars);
+      
 
-   
-    if (brand && name && price && fuelType) {
-        document.getElementById('message').textContent = `Carro ${name} (${brand}) cadastrado com sucesso!`;
-        document.getElementById('message').style.color = 'green';
+        tableBody.innerHTML = '';
+
+        cars.reverse().forEach(function(car) {
+          const row = `
+            <tr data-id="${car.id}">
+            <td>${car.brand}</td>
+            <td>${car.name}</td>
+            <td>${car.price}</td>
+          `;
+          tableBody.innerHTML += row;
+        })
 
 
-        document.getElementById('carForm').reset();
-    } else {
-        document.getElementById('message').textContent = 'Preencha todos os campos corretamente.';
-        document.getElementById('message').style.color = 'red';
+    } catch (error) {
+
     }
-});
+    
+}
+
+fetchData()
