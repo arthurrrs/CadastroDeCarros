@@ -3,118 +3,188 @@ async function fetchData() {
   tableBody.innerHTML = '<tr><td colspan="5" class="text-center">Carregando carros...</td></tr>'
 
   try {
-    const response = await fetch('https://carangas.herokuapp.com/cars')
+      const response = await fetch('https://carangas.herokuapp.com/cars')
 
-    const data = await response.json();
-    const cars = data;
-    console.log(cars);
+      const data = await response.json();
+      const cars = data;
+      console.log(cars);
 
+      tableBody.innerHTML = '';
 
-    tableBody.innerHTML = '';
-
-    cars.reverse().forEach(function (car) {
-      const fuelText = getFuelName(car.gasType);
-
-      const row = `
-            <tr data-id="${car.id}">
-            <td>${car.brand}</td>
-            <td>${car.name}</td>
-            <td>${car.price}</td> 
-            <td>${fuelText}</td> 
-            <td>
-            <button class = "btn btn-danger btn-sm" id="delete-btn" data-id="${car._id}">Deletar</butto></td>
-
+      cars.reverse().forEach(function(car) {
+          const fuelText = getFuelName(car.gasType);
+          
+          const row = `
+          <tr data-id="${car._id}">
+              <td>${car.brand}</td>   
+              <td>${car.name}</td>   
+              <td>${car.price}</td>   
+              <td>${fuelText}</td>
+              <td>
+              <button class="btn btn-warning btn-sm" id="update-btn" data-id="${car._id}">Editar</button>
+              <button class="btn btn-danger btn-sm" id="delete-btn" data-id="${car._id}">Deletar</button>
+              </td>
           `;
-      tableBody.innerHTML += row;
-    })
+          tableBody.innerHTML += row;
+      })
+      
+
 
 
   } catch (error) {
-
+      
   }
 
-  function getFuelName(value) {
-    const fuelType = {
-      "0": "Desconhecido",
-      "1": "Gasolina",
-      "2": "Etanol + Gasolina",
-      "3": "Eletricidade",
-      "4": "Etanol",
-    };
-    return fuelType[value] || " - ";
+}
 
-    async function addCar(event) {
-      event.preventDefault();
+function getFuelName(value) {
+  const fuelTypes = {
+      "0" : "Desconhecido",
+      "1" : "Gasolina",
+      "2" : "Etanol + Gasolina",
+      "3" : "Eletricidade",
+      "4" : "Etanol",
+  };
+  return fuelTypes[value] || " - ";
+}
 
-      try{
-        //event.preventDefault();
 
-         var data = {
-          "brand": "Audi",
-          "gasType": 2,
-          "name": "AudiTT",
-          "price": 200000,
-         }
+async function addCar() {
+// event.preventDefault()
 
-        try {
-          const response = await fetch(`https://carangas.herokuapp.com/cars/${carId}`, {
-            method:"POST",
-            headers: {
-              "content-Type": "application/json"
-            },
-            body: JSON.stringify(data)
-            
+  const brand = document.getElementById("inputBrand").value;
+  const name = document.getElementById("inputName").value;
+  const price = parseFloat(document.getElementById("inputPrice").value);
+  const fuelType = document.getElementById("fuelType").value;
 
-          });
+  const newCar = {
+      "brand": brand,
+      "name": name,
+      "price": price,
+      "gasType": fuelType
+  };
 
-          console.log("Carro adicionado com sucesso");
+  try {
+      const response = await fetch('https://carangas.herokuapp.com/cars' ,{
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json"
+      },
+          body: JSON.stringify(newCar)
+  });
 
-        }
-         
-        
-          
-          fetchData();
+  console.log("Carro adicionado com sucesso");
 
-      }catch (error){
-        console.error(error);
-        
-      }
+  fetchData();
 
-    }
+  } catch (error) {
+      console.error(error);
   }
+}
 
-  document.addEventListener('click', function (event) {
-    if (event.target.id.startsWith('delete-btn')) {
+// document.getElementById("carForm").addEventListener("submit", addCar())
+
+document.addEventListener('click', function(event) {
+  if (event.target.id.startsWith('delete-btn')) {
       const carId = event.target.getAttribute('data-id');
 
       deleteCar(carId);
-    }
-  })
+  }
+})
 
-  async function deleteCar(carId) {
-    try {
+async function deleteCar(carId) {
+  try {
       const response = await fetch(`https://carangas.herokuapp.com/cars/${carId}`, {
-        method: "DELETE",
-        headers: {
-          "content-Type": "application/Json"
-        }
+          method: "DELETE",
+          headers: {
+              "Content-Type": "application/json"
+          }
       });
 
       if (!response.ok) {
-        throw new Error("Erro ao deletar o carro");
+          throw new Error("Erro ao Deletar o carro");
       }
 
       console.log("Carro deletado com sucesso!");
-
+      
       location.reload()
 
-    } catch (error) {
+  } catch (error) {
       console.error(error);
+  }
+}
 
-    }
+
+
+document.addEventListener('DOMContentLoaded', function()
+{
+
+  document.body.insertAdjacentElement('baforeend',`
+       <div class="modal fade" id="editCarModal" tabindex="-1" aria-labelledby="editCarModalLabel" aria-hidden="true">;
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editCarModalLabel">Editar Carro</h5>
+                    <button class="btn-close" type="button" id="closeEditModal" data-bs-dismiss="modal" aria-label="close"></button>
+                </div>
+            </div class="modal-body">
+            <form id="ediCarFrom">
+                <input type="hidden" id="editCarEdit">
+                <div class="mb-3">
+                    <label for="editBrand" class="form-label">Nome</label>
+                    <input type="text" class="form-control" id="editName" required>
+                </div>
+                <div class="mb-3">
+                    <label for="editName" class="form-label">Marca</label>
+                    <input type="text" class="form-control" id="editBrand" required>
+                </div>
+                <div class="mb-3">
+                    <label for="editPrice" class="form-label">Preço</label>
+                    <input type="number" class="form-control" id="editPrice" required>
+                </div>
+                <div class="mb-3">
+                    <label for="editFuelType" class="form-label">Tipo de Combustivel</label>
+                    <select class="form-select" id="editFuelType">
+                        <option value="0">Desconhecido</option>
+                        <option value="1">Gasolina</option>
+                        <option value="2">Etanol + Gasolina</option>
+                        <option value="3">Elétrico</option>
+                        <option value="4">Etanol</option>
+
+
+                    </select>                 
+                </div>
+                <button type="submit" class="btn btn-primary" id="saveEditCar">Salvar Alterações</button>
+            </form>
+        </div>
+
+    </div>
+ 
+    `)
+
+    document.getElementById('car-table').addEventListener('click', function(event) {
+      if(event.target.id.startsWith('update-btn')) {
+        const carId = event.target.getAttribute('data-id');
+        openEditModal(carId);
+      }
+  });
+
+  async function openEditModal(carId) {
+    
   }
 
 
-}
+})
+
+
+
+
+
+
+
+
+
+
+
 
 fetchData()
